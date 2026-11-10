@@ -55,7 +55,9 @@ conda activate project
   - Batch Size: `50` (training), `10,000` (testing)
   - Optimizer: `Adam` (`lr = 0.0005`)
   - Loss Function: `CrossEntropyLoss`
-  - Epochs: `3`
+  - Epochs: `5` (default)
+  - Random Seed: `42` (ensures reproducible initialization and data batching)
+  - Evaluation: Deterministic test evaluation with `shuffle=False`
 - **How to Run:**
   ```bash
   cd ~/CSC8370_DATA_SECURITY/src
@@ -66,10 +68,10 @@ conda activate project
   # Optional: specify custom test dataset path and model checkpoint path:
   python Level_1_Solution.py --mode test --data_dir /path/to/mnist --model_path best_model.pth
 
-  # 2. Centralized training mode (trains for 3 epochs and saves best_model.pth):
+  # 2. Centralized training mode (trains for 5 epochs with seed=42 and saves best_model.pth):
   python Level_1_Solution.py --mode train
   ```
-- **Baseline Result:** Achieves **99.04%** test accuracy (`0.9904`) after 3 epochs and saves model weights to `best_model.pth`.
+- **Baseline Result:** Achieves **99.02%** test accuracy (`0.9902`) after 5 epochs (reproducible with `seed=42`) and saves model weights to `best_model.pth`.
 
 ---
 

@@ -26,25 +26,33 @@ Model Architecture (ConvNet):
 
 Data & Training Configuration:
     - Dataset:       MNIST (60,000 train samples / 10,000 test samples)
-    - Batch Size:    50 (train_loader), 10,000 (test_loader)
+    - Normalization: Mean=0.5, Std=0.5 (scaled to [-1, 1])
+    - Batch Size:    50 (train_loader), 10,000 (test_loader with shuffle=False)
     - Optimizer:     Adam (learning_rate = 0.0005)
     - Loss Function: CrossEntropyLoss
-    - Epochs:        3
+    - Epochs:        5 (default)
+    - Seed:          42 (fully reproducible across random, numpy, and torch)
     - Output Model:  Saves best model parameters to 'best_model.pth'
 
 Usage:
     conda activate project
-    # Testing / Inference only (TA Demo Day evaluation):
-    python Level_1_Solution.py --mode test
-    python Level_1_Solution.py --mode test --data_dir /path/to/eval_data
+    cd ~/CSC8370_DATA_SECURITY/src
 
-    # Full training from scratch:
+    # 1. Inference-only evaluation (loads best_model.pth directly for Demo Day):
+    python Level_1_Solution.py --mode test
+
+    # Optional: specify custom test dataset path and model checkpoint path:
+    python Level_1_Solution.py --mode test --data_dir /path/to/eval_data --model_path best_model.pth
+
+    # 2. Centralized training from scratch (trains for 5 epochs and saves best_model.pth):
     python Level_1_Solution.py --mode train
 ================================================================================
 """
 
 import argparse
 import os
+import random
+import numpy as np
 import torch
 import torchvision
 import torchvision.transforms as transforms
@@ -54,6 +62,17 @@ from torch.utils.data import DataLoader
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_DATA_DIR = os.path.join(SCRIPT_DIR, "data", "mnist")
 DEFAULT_MODEL_PATH = os.path.join(SCRIPT_DIR, "best_model.pth")
+
+
+def set_seed(seed=42):
+    """
+    Set seeds across all random number generators for full reproducibility.
+    """
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 
 def dataloader(train_dataset, test_dataset):
@@ -148,10 +167,11 @@ def evaluate_model(model, test_loader, device):
     return accuracy
 
 
-def train(epochs=3, learning_rate=0.0005, data_dir=DEFAULT_DATA_DIR, model_save_path=DEFAULT_MODEL_PATH):
+def train(epochs=5, learning_rate=0.0005, data_dir=DEFAULT_DATA_DIR, model_save_path=DEFAULT_MODEL_PATH):
     """
     Train the ConvNet model in a centralized manner on MNIST and save the best checkpoint.
     """
+    set_seed(42)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Starting centralized training on device: {device}")
     print(f"Dataset directory: {data_dir}")
@@ -257,8 +277,8 @@ def main():
     parser.add_argument(
         "--epochs",
         type=int,
-        default=3,
-        help="Number of training epochs (default: 3)",
+        default=5,
+        help="Number of training epochs (default: 5)",
     )
     parser.add_argument(
         "--lr",
