@@ -59,7 +59,15 @@ conda activate project
 - **How to Run:**
   ```bash
   cd ~/CSC8370_DATA_SECURITY/src
-  python Level_1_Solution.py
+  
+  # 1. Inference-only test mode (Demo Day evaluation - loads best_model.pth directly):
+  python Level_1_Solution.py --mode test
+
+  # Optional: specify custom test dataset path and model checkpoint path:
+  python Level_1_Solution.py --mode test --data_dir /path/to/mnist --model_path best_model.pth
+
+  # 2. Centralized training mode (trains for 3 epochs and saves best_model.pth):
+  python Level_1_Solution.py --mode train
   ```
 - **Baseline Result:** Achieves **99.04%** test accuracy (`0.9904`) after 3 epochs and saves model weights to `best_model.pth`.
 
