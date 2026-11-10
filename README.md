@@ -75,6 +75,34 @@ conda activate project
 
 ---
 
+### Level 2: 10-Client Federated Learning (`src/Level_2_Solution.py`)
+- **Framework & Aggregation:**
+  - Standard Federated Averaging (`FedAvg`) aggregating 10 clients.
+  - Training dataset partitioned into 10 disjoint subsets of `6,000` samples per client using `random_split`.
+- **Training Setup:**
+  - Clients: `10`
+  - Global Rounds: `10` (fixed by project requirements)
+  - Local Epochs: `1` per round (fixed by project requirements)
+  - Batch Size: `50` (local client loaders), `1,000` (server test loader)
+  - Optimizer: `Adam` (`lr = 0.0005` per client)
+  - Random Seed: `42`
+- **How to Run:**
+  ```bash
+  cd ~/CSC8370_DATA_SECURITY/src
+
+  # 1. Inference-only test mode (Demo Day evaluation - loads best_fl_model.pth directly):
+  python Level_2_Solution.py --mode test
+
+  # Optional: specify custom test dataset path:
+  python Level_2_Solution.py --mode test --data_dir /path/to/mnist --model_path best_fl_model.pth
+
+  # 2. Federated training mode (10 global rounds, 1 local epoch per round):
+  python Level_2_Solution.py --mode train
+  ```
+- **Federated Result:** Achieves **98.71%** global test accuracy (`0.9871`) across 10 clients over 10 global rounds (1 local epoch per round, `seed=42`) and saves model weights to `best_fl_model.pth`.
+
+---
+
 ## 5. Project Schedule & Milestones
 
 | Dates | Milestone | Status |
