@@ -36,7 +36,6 @@ Federated Training Configuration:
     - Local Epochs:   1 per round (fixed)
     - Aggregation:    Federated Averaging (FedAvg)
     - Output Model:   Saves best global model parameters to 'best_fl_model.pth'
-                      (and final model to 'federated_model.pth')
 
 Usage:
     conda activate project
@@ -265,11 +264,8 @@ def federated_learning(n_clients=10, global_epochs=10, local_epochs=1,
             torch.save(global_model.state_dict(), model_save_path)
             print(f"--> Saved new best global model to '{model_save_path}' (Accuracy: {best_accuracy:.4f})")
 
-    # Also save final model weights to 'federated_model.pth' as in template
-    final_path = os.path.join(SCRIPT_DIR, "federated_model.pth")
-    torch.save(global_model.state_dict(), final_path)
-    print(f"\nSaved final global model to '{final_path}'.")
-    print(f"Best Global FL Test Accuracy achieved: {best_accuracy:.4f} ({best_accuracy:.2%})")
+    print(f"\nBest Global FL Test Accuracy achieved: {best_accuracy:.4f} ({best_accuracy:.2%})")
+    print(f"Saved best global model to '{model_save_path}'.")
     print("Federated learning process completed.")
     return best_accuracy
 
