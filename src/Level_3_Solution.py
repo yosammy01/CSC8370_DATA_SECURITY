@@ -42,6 +42,10 @@ Usage:
     # 1. Run live robust federated learning with attack detection:
     python Level_3_Solution.py --mode train
 
+    # Optional: customize attack strategy or malicious client ID (0-indexed):
+    python Level_3_Solution.py --mode train --attack_type gaussian_noise
+    python Level_3_Solution.py --mode train --malicious_id 9
+
     # 2. Inference-only evaluation of saved robust model:
     python Level_3_Solution.py --mode test
 ================================================================================
@@ -315,18 +319,32 @@ def robust_federated_learning(n_clients=10, global_epochs=10, local_epochs=1,
                 # === MALICIOUS CLIENT LOGIC HERE ===
                 # (Required by Course Instructions for TA live Demo Day testing)
                 # =============================================================
-                malicious_result = generate_malicious_update(
-                    client_model_state_dict=copy.deepcopy(client_models[client_idx].state_dict()),
-                    local_dataset=client_datasets[client_idx],
-                    device=device,
-                    attack_type=attack_type
-                )
+                try:
+                    # Supports 4 arguments (our dynamic testing module)
+                    malicious_result = generate_malicious_update(
+                        client_model_state_dict=copy.deepcopy(client_models[client_idx].state_dict()),
+                        local_dataset=client_datasets[client_idx],
+                        device=device,
+                        attack_type=attack_type
+                    )
+                except TypeError:
+                    # Fallback to standard 3-argument signature in TA's course template:
+                    # generate_malicious_update(client_model_state_dict, local_dataset, device)
+                    malicious_result = generate_malicious_update(
+                        client_model_state_dict=copy.deepcopy(client_models[client_idx].state_dict()),
+                        local_dataset=client_datasets[client_idx],
+                        device=device
+                    )
+
                 if isinstance(malicious_result, tuple):
                     malicious_state, chosen_attack = malicious_result
+                    print(f"  [ATTACK INJECTED] Client {client_idx + 1} (Malicious) injected dynamic attack: '{chosen_attack}'")
                 else:
-                    malicious_state, chosen_attack = malicious_result, attack_type
+                    malicious_state = malicious_result
+                    print(f"  [ATTACK INJECTED] Client {client_idx + 1} (Malicious) injected malicious model update.")
 
-                print(f"  [ATTACK INJECTED] Client {client_idx + 1} (Malicious) injected dynamic attack: '{chosen_attack}'")
+                # Ensure all returned parameter tensors match the active compute device (CPU or CUDA)
+                malicious_state = {k: v.to(device) for k, v in malicious_state.items()}
                 client_models[client_idx].load_state_dict(malicious_state)
             else:
                 # Benign local training
@@ -427,6 +445,12 @@ def main():
         help="Simulated attack strategy for Client 10 ('random', 'gaussian_noise', 'sign_flip', 'zero_out', 'scaling_attack', 'subtle_drift')",
     )
     parser.add_argument(
+        "--malicious_id",
+        type=int,
+        default=9,
+        help="0-indexed ID of the malicious client (default: 9 for Client 10)",
+    )
+    parser.add_argument(
         "--data_dir",
         type=str,
         default=DEFAULT_DATA_DIR,
@@ -458,7 +482,7 @@ def main():
             n_clients=10,
             global_epochs=args.global_epochs,
             local_epochs=args.local_epochs,
-            malicious_client_id=9,
+            malicious_client_id=args.malicious_id,
             attack_type=args.attack_type,
             data_dir=args.data_dir,
             model_save_path=args.model_path,

@@ -124,9 +124,10 @@ conda activate project
   # 1. Run live robust FL with attack injection and server-side detection:
   python Level_3_Solution.py --mode train
 
-  # Optional: simulate different attack strategies (gaussian_noise, sign_flip, zero_out):
+  # Optional: customize attack strategy or change malicious client ID (0-indexed, default: 9 for Client 10):
   python Level_3_Solution.py --mode train --attack_type gaussian_noise
   python Level_3_Solution.py --mode train --attack_type sign_flip
+  python Level_3_Solution.py --mode train --malicious_id 9
 
   # 2. Inference-only evaluation of saved robust model:
   python Level_3_Solution.py --mode test
